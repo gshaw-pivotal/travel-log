@@ -1,17 +1,34 @@
 const express = require('express');
 const app = express();
+const {validationResult, body} = require('express-validator');
+const bodyParser = require('body-parser');
 
 const API_KEY = 'foo-bar';
+
+app.use( bodyParser.json() );
+app.use(bodyParser.urlencoded({  extended: true }));
+
+// Validation of incoming log request
+const checkTitle = () => body('title').trim().notEmpty();
+const checkLogDate = () => body('logDate').trim().notEmpty();
 
 app.get('/logs', async (req, res, next) => {
     return res.status(200).json({});
 });
 
-app.post('/log', async (req, res, next) => {
+app.post('/log', checkTitle(), checkLogDate(), async (req, res, next) => {
     try {
         if (req.get('X-API-KEY') !== API_KEY) {
+            // No API key on request, unauthorized
             return res.status(401).json({errors: 'Unauthorized access'});
         } else {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                // Incoming log entry request failed validation checks
+                return res.status(400).json({errors: errors.array()});
+            }
+
             return res.status(200).json({});
         }
     } catch (error) {
