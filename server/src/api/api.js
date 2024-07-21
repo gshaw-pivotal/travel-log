@@ -15,7 +15,8 @@ const checkTitle = () => body('title').trim().notEmpty();
 const checkLogDate = () => body('logDate').trim().notEmpty();
 
 app.get('/logs', async (req, res, next) => {
-    return res.status(200).json({});
+    const logs = await LogService.getLogs();
+    return res.status(200).json({logs});
 });
 
 app.post('/log', checkTitle(), checkLogDate(), async (req, res, next) => {
@@ -31,7 +32,7 @@ app.post('/log', checkTitle(), checkLogDate(), async (req, res, next) => {
                 return res.status(400).json({errors: errors.array()});
             }
 
-            LogService.logService(matchedData(req));
+            await LogService.addLog(matchedData(req));
             return res.status(200).json({});
         }
     } catch (error) {
