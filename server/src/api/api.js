@@ -1,7 +1,9 @@
 const express = require('express');
 const app = express();
-const {validationResult, body} = require('express-validator');
+const {validationResult, body, matchedData} = require('express-validator');
 const bodyParser = require('body-parser');
+
+const LogService = require('../service/log_service')
 
 const API_KEY = 'foo-bar';
 
@@ -29,6 +31,7 @@ app.post('/log', checkTitle(), checkLogDate(), async (req, res, next) => {
                 return res.status(400).json({errors: errors.array()});
             }
 
+            LogService.logService(matchedData(req));
             return res.status(200).json({});
         }
     } catch (error) {
